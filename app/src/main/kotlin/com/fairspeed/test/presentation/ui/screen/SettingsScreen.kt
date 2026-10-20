@@ -15,10 +15,18 @@
  * along with FairSpeed.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Modified 2026-10-20: persistent accent selection for the FairSpeed Material You fork.
+
 package com.fairspeed.test.presentation.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -26,14 +34,19 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fairspeed.test.domain.model.AppTheme
+import com.fairspeed.test.domain.model.AccentMode
+import com.fairspeed.test.domain.model.normalizeAccentHex
+import com.fairspeed.test.presentation.ui.theme.accentPreview
 import com.fairspeed.test.presentation.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,9 +59,14 @@ fun SettingsScreen(
     onAboutClick: () -> Unit = {}
 ) {
     val currentTheme by viewModel.appTheme.collectAsState()
+    val accentMode by viewModel.accentMode.collectAsState()
+    val customAccentHex by viewModel.customAccentHex.collectAsState()
     val defaultServerId by viewModel.defaultServerId.collectAsState()
     val servers by viewModel.servers.collectAsState()
     var themeMenuExpanded by remember { mutableStateOf(false) }
+    var showAccentDialog by remember { mutableStateOf(false) }
+    var pendingAccent by remember { mutableStateOf(AccentMode.MATERIAL_YOU) }
+    var pendingCustomHex by remember { mutableStateOf("367C89") }
     var serverMenuExpanded by remember { mutableStateOf(false) }
 
     Column(
@@ -64,7 +82,7 @@ fun SettingsScreen(
             )
         )
         
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
             // Default Server Section
             Row(
                 modifier = Modifier
@@ -190,6 +208,47 @@ fun SettingsScreen(
             
             HorizontalDivider()
 
+            // Accent palette, independent of Android's system-wide wallpaper colors.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        pendingAccent = accentMode
+                        pendingCustomHex = customAccentHex
+                        showAccentDialog = true
+                    }
+                    .padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Palette,
+                    contentDescription = "Accent color",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Accent Color", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+                    Text(
+                        if (accentMode == AccentMode.MATERIAL_YOU) "Material You · follows system colors"
+                        else accentMode.displayName,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(
+                            if (accentMode == AccentMode.MATERIAL_YOU) MaterialTheme.colorScheme.primary
+                            else accentPreview(accentMode, customAccentHex),
+                            CircleShape
+                        )
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                )
+            }
+
+            HorizontalDivider()
+
             // Donate Section
             Row(
                 modifier = Modifier
@@ -273,5 +332,79 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    if (showAccentDialog) {
+        val normalized = normalizeAccentHex(pendingCustomHex)
+        val validHex = normalized != null
+        AlertDialog(
+            onDismissRequest = { showAccentDialog = false },
+            title = { Text("Choose accent color") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        "Only changes FairSpeed. Your phone's system colors stay as they are.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    LazyColumn(modifier = Modifier.heightIn(max = 370.dp)) {
+                        items(AccentMode.values().toList()) { option ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { pendingAccent = option }
+                                    .padding(vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                RadioButton(
+                                    selected = pendingAccent == option,
+                                    onClick = { pendingAccent = option }
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(23.dp)
+                                        .background(
+                                            if (option == AccentMode.MATERIAL_YOU) MaterialTheme.colorScheme.primary
+                                            else accentPreview(option, pendingCustomHex),
+                                            CircleShape
+                                        )
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                                )
+                                Text(option.displayName)
+                            }
+                        }
+                    }
+                    if (pendingAccent == AccentMode.CUSTOM) {
+                        OutlinedTextField(
+                            value = pendingCustomHex,
+                            onValueChange = { input ->
+                                if (input.length <= 7 && input.all { it == '#' || it.isLetterOrDigit() }) {
+                                    pendingCustomHex = input
+                                }
+                            },
+                            label = { Text("RGB hex (e.g. 367C89)") },
+                            singleLine = true,
+                            isError = !validHex,
+                            supportingText = {
+                                if (!validHex) Text("Enter exactly six hexadecimal digits")
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    enabled = pendingAccent != AccentMode.CUSTOM || validHex,
+                    onClick = {
+                        viewModel.setAccent(pendingAccent, normalized ?: customAccentHex)
+                        showAccentDialog = false
+                    }
+                ) { Text("Apply") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAccentDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }

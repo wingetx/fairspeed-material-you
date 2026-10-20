@@ -13,8 +13,8 @@ android {
         applicationId = "io.github.wingetx.fairspeed"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.0.6"
+        versionCode = 10
+        versionName = "1.0.6-my2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

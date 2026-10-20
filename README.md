@@ -11,10 +11,13 @@ The original project is licensed under **GNU AGPL v3 or later**, and this modifi
 - Add space between radio controls and labels (12 dp) and between the extended-test checkbox and its label (8 dp).
 - Use an independent Android application ID (`io.github.wingetx.fairspeed`) so the unofficial build can coexist with FairSpeed from F-Droid.
 - Remove the upstream release signing configuration and key from this publication; anyone building a release must provide their own signing credentials.
+- Add a persistent Accent Color setting: Material You, five muted presets, and a six-digit RGB hex option, independent of light/dark mode.
+- Replace the original yellow logo with a tintable vector gauge and a neutral launcher icon; unused yellow bitmaps have been removed.
+- Improve status/navigation bar icon contrast in light/dark mode.
 
 ## Development status
 
-**Source-only, not yet build-tested.** No APK release is published yet. This is not affiliated with or endorsed by the upstream FairSpeed developer.
+**Development preview.** The APK and existing JVM tests build successfully. No signed release APK is published yet. This is not affiliated with or endorsed by the upstream FairSpeed developer.
 
 ## Build
 

@@ -15,15 +15,22 @@
  * along with FairSpeed.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Modified 2026-10-20: persistent accent selection for the FairSpeed Material You fork.
+
 package com.fairspeed.test.domain.repository
 
 import com.fairspeed.test.domain.model.AppTheme
+import com.fairspeed.test.domain.model.AccentMode
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
     val appTheme: Flow<AppTheme>
     suspend fun setAppTheme(theme: AppTheme)
     
+    val accentMode: Flow<AccentMode>
+    val customAccentHex: Flow<String>
+    suspend fun setAccent(mode: AccentMode, customHex: String)
+
     val defaultServerId: Flow<String?>
     suspend fun setDefaultServerId(serverId: String?)
     

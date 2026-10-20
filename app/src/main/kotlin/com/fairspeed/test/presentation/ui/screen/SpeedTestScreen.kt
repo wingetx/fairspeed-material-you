@@ -78,8 +78,6 @@ import com.fairspeed.test.domain.model.SpeedTestState
 import com.fairspeed.test.domain.model.Server
 import com.fairspeed.test.domain.model.flagEmoji
 import com.fairspeed.test.presentation.viewmodel.SpeedTestViewModel
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.IconButton
@@ -536,14 +534,14 @@ private fun IdleContent() {
             modifier = Modifier
                 .size(96.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.fairspeed_icon),
+            Icon(
+                painter = painterResource(id = R.drawable.ic_fairspeed_gauge),
                 contentDescription = stringResource(R.string.app_name),
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                modifier = Modifier.size(72.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
         Spacer(modifier = Modifier.height(12.dp))

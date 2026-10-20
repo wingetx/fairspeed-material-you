@@ -19,7 +19,6 @@
 
 package com.fairspeed.test.ui
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,18 +27,17 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fairspeed.test.domain.model.AppTheme
 import com.fairspeed.test.presentation.ui.screen.MainScreen
 import com.fairspeed.test.presentation.viewmodel.SettingsViewModel
+import com.fairspeed.test.presentation.ui.theme.fairSpeedColorScheme
 import com.fairspeed.test.presentation.viewmodel.SpeedTestViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -59,12 +57,16 @@ class MainActivity : ComponentActivity() {
                 AppTheme.SYSTEM -> isSystemInDarkTheme()
             }
 
+            val accentMode by settingsViewModel.accentMode.collectAsState()
+            val customAccentHex by settingsViewModel.customAccentHex.collectAsState()
             val context = LocalContext.current
-            val colorScheme = when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isDarkTheme -> dynamicDarkColorScheme(context)
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicLightColorScheme(context)
-                isDarkTheme -> darkColorScheme()
-                else -> lightColorScheme()
+            val colorScheme = fairSpeedColorScheme(context, isDarkTheme, accentMode, customAccentHex)
+
+            SideEffect {
+                // Match system bar icon contrast to the selected app appearance.
+                val bars = WindowInsetsControllerCompat(window, window.decorView)
+                bars.isAppearanceLightStatusBars = !isDarkTheme
+                bars.isAppearanceLightNavigationBars = !isDarkTheme
             }
 
             MaterialTheme(colorScheme = colorScheme) {

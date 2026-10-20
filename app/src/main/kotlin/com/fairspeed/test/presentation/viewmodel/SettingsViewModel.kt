@@ -15,11 +15,14 @@
  * along with FairSpeed.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Modified 2026-10-20: persistent accent selection for the FairSpeed Material You fork.
+
 package com.fairspeed.test.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fairspeed.test.domain.model.AppTheme
+import com.fairspeed.test.domain.model.AccentMode
 import com.fairspeed.test.domain.model.Server
 import com.fairspeed.test.domain.model.Result
 import com.fairspeed.test.domain.repository.ISpeedTestRepository
@@ -43,6 +46,20 @@ class SettingsViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = AppTheme.SYSTEM
+        )
+
+    val accentMode: StateFlow<AccentMode> = settingsRepository.accentMode
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = AccentMode.MATERIAL_YOU
+        )
+
+    val customAccentHex: StateFlow<String> = settingsRepository.customAccentHex
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = "367C89"
         )
 
     val defaultServerId: StateFlow<String?> = settingsRepository.defaultServerId
@@ -83,6 +100,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
     
+    fun setAccent(mode: AccentMode, customHex: String) {
+        viewModelScope.launch {
+            settingsRepository.setAccent(mode, customHex)
+        }
+    }
+
     fun setDefaultServerId(serverId: String?) {
         viewModelScope.launch {
             settingsRepository.setDefaultServerId(serverId)

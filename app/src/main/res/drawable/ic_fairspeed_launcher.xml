@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Neutral launcher icon, distinct from the original yellow FairSpeed branding. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#293943" />
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/ic_fairspeed_gauge"
+        android:gravity="center"
+        android:width="72dp"
+        android:height="72dp" />
+</layer-list>
