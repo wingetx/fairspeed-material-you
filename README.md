@@ -12,7 +12,7 @@ The original project is licensed under **GNU AGPL v3 or later**, and this modifi
 - Use an independent Android application ID (`io.github.wingetx.fairspeed`) so the unofficial build can coexist with FairSpeed from F-Droid.
 - Remove the upstream release signing configuration and key from this publication; anyone building a release must provide their own signing credentials.
 - Add a persistent Accent Color setting: Material You, five muted presets, and a six-digit RGB hex option, independent of light/dark mode.
-- Replace the original yellow logo with a tintable vector gauge and a neutral launcher icon; unused yellow bitmaps have been removed.
+- Replace the original yellow logo with a tintable vector gauge and a matching neutral slate-and-white launcher icon; the launcher is exported as density-specific PNGs so APK file managers can show it reliably. Unused yellow bitmaps have been removed.
 - Improve status/navigation bar icon contrast in light/dark mode.
 
 ## Development status
