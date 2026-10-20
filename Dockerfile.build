@@ -1,0 +1,39 @@
+# Docker image for building FairSpeed APK
+# Build with: docker build -t fairspeed-builder .
+# Run with: docker run -v $(pwd):/fairspeed fairspeed-builder
+
+FROM eclipse-temurin:21-jdk
+
+# Install Android SDK requirements
+RUN apt-get update && apt-get install -y \
+    wget \
+    zip \
+    unzip \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Android SDK path
+ENV ANDROID_SDK_ROOT="/android-sdk"
+ENV ANDROID_HOME="/android-sdk"
+ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${PATH}"
+
+# Download and install Android SDK
+RUN mkdir -p "${ANDROID_SDK_ROOT}" && \
+    cd /tmp && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-12.0_latest.zip && \
+    unzip -q commandlinetools-linux-12.0_latest.zip && \
+    mkdir -p "${ANDROID_SDK_ROOT}/cmdline-tools/latest" && \
+    mv cmdline-tools/* "${ANDROID_SDK_ROOT}/cmdline-tools/latest/" && \
+    rm -rf /tmp/* && \
+    yes | sdkmanager --licenses >/dev/null 2>&1 || true
+
+# Install build tools and platforms
+RUN sdkmanager \
+    "platforms;android-34" \
+    "build-tools;34.0.0" \
+    "platform-tools" \
+
+WORKDIR /fairspeed
+
+# Default command: build debug APK
+CMD ["./gradlew", "assembleDebug"]

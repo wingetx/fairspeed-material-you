@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  librespeed:
+    image: librespeed/speedtest:latest
+    container_name: fairspeed-test-server
+    ports:
+      - "8080:80"
+    environment:
+      # Server configuration
+      MODE: standalone
+      ENABLE_LOG: 1
+      TELEMETRY: "false"
+      ENABLE_TELEMETRY: "false"
+      DATABASE: sqlite
+      
+      # HTTPS (optional)
+      # ENABLE_HTTPS: "1"
+      # CERT_PATH: /app/certs/cert.pem
+      # KEY_PATH: /app/certs/key.pem
+      
+      # Location info
+      # These are optional but useful for server listings
+      # LAT: "41.9028"
+      # LON: "12.4964"
+      # COUNTRY: "IT"
+      # LOCATION: "Rome, Italy"
+      # USER_CAN_DELETE_RESULTS: "true"
+    
+    volumes:
+      # Store test results
+      - ./speedtest-results:/app/results
+      - ./speedtest.db:/app/results.db
+      
+      # Optional: SSL certificates
+      # - ./certs:/app/certs
+    
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/config"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - speedtest-network
+    
+    # Resource limits (adjust for your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+  # Optional: Nginx reverse proxy for HTTPS and better performance
+  nginx:
+    image: nginx:alpine
+    container_name: fairspeed-nginx
+    ports:
+      - "8443:443"
+      - "80:80"
+    
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    
+    depends_on:
+      - librespeed
+    
+    restart: unless-stopped
+    
+    networks:
+      - speedtest-network
+    
+    # Only enable if you're using HTTPS certificates
+    # Remove this entire section if using plain HTTP
+    profiles:
+      - with-nginx
+
+networks:
+  speedtest-network:
+    driver: bridge

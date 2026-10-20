@@ -1,0 +1,42 @@
+* text=auto
+
+# Kotlin files
+*.kt text eol=lf
+*.kts text eol=lf
+
+# Gradle files
+*.gradle text eol=lf
+*.gradle.kts text eol=lf
+gradle-wrapper.properties text eol=lf
+
+# Shell scripts
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Batch files
+*.bat text eol=crlf
+gradlew.bat text eol=crlf
+
+# XML files
+*.xml text eol=lf
+AndroidManifest.xml text eol=lf
+
+# JSON
+*.json text eol=lf
+
+# Markdown
+*.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.apk binary
+*.jar binary
+*.class binary
+
+# IDE
+.idea/** export-ignore
+.vscode/** export-ignore
+*.iml export-ignore
